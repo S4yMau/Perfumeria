@@ -1,14 +1,18 @@
-principal()
+function llamarPerfumes() {
+    fetch("perfumes.json")
+        .then(res => res.json())
+        .then(perfumes => principal(perfumes))
+        .catch(err => Swal.fire({
+            title: 'Error!',
+            text: err,
+            icon: 'error',
+            confirmButtonText: 'Cerrar'
+        }))
+}
 
-function principal() {
+llamarPerfumes()
 
-    const perfumes = [
-        { nombre: "kevin", precio: 10000, importado: false },
-        { nombre: "bad boy", precio: 100000, importado: true },
-        { nombre: "colbert", precio: 9000, importado: false },
-        { nombre: "chester ice", precio: 8000, importado: false },
-        { nombre: "one million", precio: 120000, importado: true },
-    ]
+function principal(perfumes) {
 
     let carrito = recuperarStorage()
 
@@ -43,8 +47,8 @@ function crearTarjetas(perfumes) {
 
     perfumes.forEach(perfume => {
         ofertas.innerHTML += `
-        <div class="ofertas__card">
-            <img class="card__img" src="imgs/logo.png" alt="">
+        <div class="ofertas__card" id="occ${perfume.nombre}">
+            <img class="card__img" src="${perfume.img}" alt="">
             <h3 class="card__title">${perfume.nombre.toUpperCase()}</h3>
             <p class="card__price">${perfume.precio}$</p>
             <button class="card__button" id="${perfume.nombre}">Agregar al carrito</button>
@@ -69,7 +73,8 @@ function productoAlCarrito(event, perfumes) {
             nombre: perfumeOriginal.nombre,
             precio: Number(perfumeOriginal.precio),
             unidades: Number(1),
-            subtotal: Number(perfumeOriginal.precio)
+            subtotal: Number(perfumeOriginal.precio),
+            img: perfumeOriginal.img
         })
     } else {
         carrito[indicePerfumeCarrito].unidades++
@@ -94,9 +99,9 @@ function agregarEnCarrito(carrito) {
         sectionCarrito.innerHTML += `
         <div class="carrito" id="tar${perfume.nombre}">
             <div class="carrito__container-img">
-                <img src="imgs/logo.png" alt="" class="carrito_img">
+                <img src="${perfume.img}" alt="" class="carrito_img">
             </div>
-            <p class="carrito__datos">${perfume.nombre}</p>
+            <p class="carrito__datos">${perfume.nombre.toUpperCase()}</p>
             <p class="carrito__datos">${perfume.precio}</p>
             <div class="carrito__unidades">
                 <button class="carrito__unidades-button menos" id="men${perfume.nombre}">-</button>
@@ -176,17 +181,10 @@ function recuperarStorage() {
 
 function filtrarYMostrar(e, perfumes) {
 
-    let perfumesFiltrados = filtrar(e.target.value, perfumes)
+        perfumes.forEach(perfume => document.getElementById(`occ${perfume.nombre}`).classList.remove("hidden"))
 
-    crearTarjetas(perfumesFiltrados)
-
-}
-
-function filtrar(valor, perfumes) {
-
-    let perfumesFiltrados = perfumes.filter(perfume => perfume.nombre.includes(valor))
-
-    return perfumesFiltrados
+        let perfumesFiltrados = perfumes.filter(perfume => !(perfume.nombre.includes(e.target.value)))
+        perfumesFiltrados.forEach(perfume => document.getElementById(`occ${perfume.nombre}`).classList.add("hidden"))
 
 }
 
@@ -209,10 +207,22 @@ function eliminar(e) {
 }
 
 function finalizarCompra() {
-    alert("Gracias por su compra")
-    agregarEnCarrito([])
-    localStorage.removeItem("carrito")
-    localStorage.setItem("carrito", JSON.stringify([]))
+    Swal.fire({
+        title: 'Compra!',
+        text: '¿Seguro desea realizar la compra?',
+        icon: 'warning',
+        confirmButtonText: 'Aceptar',
+        showCancelButton: true,
+        cancelButtonColor:"#ff754b",
+        confirmButtonColor:"#083808"
+    }).then((res) => {
+        if (res.isConfirmed) {
+            agregarEnCarrito([])
+        localStorage.removeItem("carrito")
+        localStorage.setItem("carrito", JSON.stringify([]))
+        }
+    })
+    
 }
 
 function restarUnidad(e) {
@@ -225,6 +235,8 @@ function restarUnidad(e) {
         carrito[indicePerfume].unidades--
         if (carrito[indicePerfume].unidades == -1) {
             e.target.parentElement.parentElement.remove()
+            carrito.splice(indicePerfume, 1)
+            guardarStorage(carrito)
         } else {
             carrito[indicePerfume].subtotal = carrito[indicePerfume].subtotal = carrito[indicePerfume].precio * carrito[indicePerfume].unidades
 
@@ -236,7 +248,6 @@ function restarUnidad(e) {
     }
     let totalSumado = calcularTotal(carrito)
     total(totalSumado)
-    //agregarEnCarrito(carrito)
 }
 
 function sumarUnidad(e) {
@@ -256,7 +267,6 @@ function sumarUnidad(e) {
     }
     let totalSumado = calcularTotal(carrito)
     total(totalSumado)
-    //agregarEnCarrito(carrito)
 }
 
 function calcularTotal(carrito) {

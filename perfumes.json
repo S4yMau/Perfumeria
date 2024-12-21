@@ -1,0 +1,32 @@
+[
+    {
+        "nombre": "kevin",
+        "precio": 10000,
+        "importado": false,
+        "img": "imgs/kevin.jpeg"
+    },
+    {
+        "nombre": "bad boy",
+        "precio": 100000,
+        "importado": true,
+        "img": "imgs/badBoy.webp"
+    },
+    {
+        "nombre": "colbert",
+        "precio": 9000,
+        "importado": false,
+        "img": "imgs/colbert.jpg"
+    },
+    {
+        "nombre": "chester ice",
+        "precio": 8000,
+        "importado": false,
+        "img": "imgs/chesterIce.png"
+    },
+    {
+        "nombre": "one million",
+        "precio": 120000,
+        "importado": true,
+        "img": "imgs/oneMillion.webp"
+    }
+]
